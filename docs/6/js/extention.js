@@ -31,7 +31,9 @@ const rubyExtension = {
   level: 'inline',
   start(src) {
     // 「｜」または「漢字＋《」の開始位置を探す
-    const match = src.match(/｜|[一-龠々〆ヵヶ]+《/);
+    //const match = src.match(/｜|[一-龠々〆ヵヶ]+《/);
+    //const match = src.match(/｜|[\\p{Script=Han}〇々〆〻〼ヶヵヿ\\uFE00-\\uFE0F\\u{E0100}-\\u{E01EF}]+《/);
+    const match = src.match(/｜|[\p{Script=Han}〇々〆〻〼ヶヵヿ\uFE00-\uFE0F\u{E0100}-\u{E01EF}]+《/u);
     return match ? match.index : -1;
   },
   tokenizer(src) {
