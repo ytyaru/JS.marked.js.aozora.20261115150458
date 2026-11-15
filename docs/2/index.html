@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Offline Markdown Preview</title>
+  <!-- ローカルに保存したファイルを相対パスで読み込む -->
+  <script src="./lib/marked/15.0.2/marked.min.js"></script>
+  <script src="./js/extention.js"></script>
+</script>
+</head>
+<body>
+  <div id="content"></div>
+  <script>
+    const markdownText = `
+# オフライン動作テスト
+- **太字**のテスト
+- リスト表示のテスト
+
+1. リスト1
+2. リスト2
+
+版|コメント
+--|--------
+1|やあ
+2|さあ
+
+｜漢字《かんじ》。
+    `;
+    // marked.parse() でHTMLに変換して描画
+    document.getElementById('content').innerHTML = marked.parse(markdownText);
+  </script>
+</body>
+</html>
+
