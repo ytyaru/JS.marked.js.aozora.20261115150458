@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Offline Markdown Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- ローカルに保存したファイルを相対パスで読み込む -->
+  <script src="./lib/marked/15.0.2/marked.min.js"></script>
+  <script src="./js/extention.js"></script>
+  <script src="./js/main.js"></script>
+</script>
+</head>
+<body>
+  <div id="content"></div>
+  <textarea id="source" data-lang="markdown" style="width:100%;">
+# オフライン動作テスト
+
+- **太字**のテスト
+- リスト表示のテスト
+
+1. リスト1
+2. リスト2
+
+版|コメント
+--|--------
+1|やあ
+2|さあ
+
+｜漢字《かんじ》。
+
+《《傍点》》。
+
+コード内の `｜漢字《かんじ》` や `《《傍点》》` は変換されずにそのまま残るが、クォートを意味するマークアップになってしまう。プレーンテキストで書き出すためのエスケープ機能が欲しい。
+
+# エスケープ確認
+
+## 単一
+
+* ＼｜
+* \|
+* \*
+* ＼《
+* ＼》
+* ＼＊
+
+## 範囲
+
+全角バッククォートで囲んだ範囲をそのままの文字として出力する。そこにメタ文字があってもOK。
+
+* ｀｜漢字《かんじ》｀
+* ｀《《全角》》｀
+* 漢字｀《スキル名》｀
+
+## 併用
+
+* ＼｜漢字｀《スキル名》｀
+
+  </textarea>
+</body>
+</html>
+
