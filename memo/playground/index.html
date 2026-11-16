@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Offline & Online Playground</title>
+<style>
+  body { display: flex; flex-direction: column; height: 100vh; margin: 0; font-family: sans-serif; }
+  .editors { display: flex; height: 45%; border-bottom: 2px solid #ccc; }
+  .editor-box { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #ddd; }
+  .editor-box label { background: #f0f0f0; padding: 4px 8px; font-size: 12px; font-weight: bold; }
+  textarea { flex: 1; border: none; padding: 8px; font-family: monospace; resize: none; outline: none; }
+  iframe { flex: 1; border: none; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="editors">
+  <div class="editor-box">
+    <label>HTML</label>
+    <textarea id="html-code"><h1>Hello Playground</h1>
+<button id="btn">クリック</button></textarea>
+  </div>
+  <div class="editor-box">
+    <label>CSS</label>
+    <textarea id="css-code">h1 { color: #0066cc; }</textarea>
+  </div>
+  <div class="editor-box">
+    <label>JavaScript</label>
+    <textarea id="js-code">document.getElementById('btn').onclick = () => alert('動作しました！');</textarea>
+  </div>
+</div>
+
+<!-- sandbox="allow-scripts" で親ページを保護しつつJSを実行 -->
+<iframe id="preview" sandbox="allow-scripts"></iframe>
+
+<script>
+  const htmlInput = document.getElementById('html-code');
+  const cssInput = document.getElementById('css-code');
+  const jsInput = document.getElementById('js-code');
+  const preview = document.getElementById('preview');
+
+  function updatePreview() {
+    const source = `
+      <!DOCTYPE html>
+      <html>
+      <head><style>${cssInput.value}</style></head>
+      <body>
+        ${htmlInput.value}
+        <script>${jsInput.value}<\/script>
+      </body>
+      </html>
+    `;
+    preview.srcdoc = source;
+  }
+
+  // 入力のたびにリアルタイム更新（負荷軽減のため300msのデバウンス処理）
+  let timer;
+  [htmlInput, cssInput, jsInput].forEach(el => {
+    el.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(updatePreview, 300);
+    });
+  });
+
+  // 初回描画
+  updatePreview();
+</script>
+
+</body>
+</html>
+
