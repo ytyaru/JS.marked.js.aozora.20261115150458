@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>日本語Markdownパーサ（修正版）</title>
+  <!--<script src="./marked.min.js"></script>-->
+  <script src="./marked.umd.min.js"></script>
+
+  <style>
+    /* ブラウザ標準と同じく上下1emの余白（マージン相殺により段落間は1行分になる） */
+    body { font-family: sans-serif; line-height: 1.8; padding: 20px; }
+    p { margin: 1em 0; }
+    /*
+    */
+  </style>
+</head>
+<body>
+
+  <div id="output"></div>
+
+  <script>
+    // カスタム拡張：地の文（トップレベル）の3連続改行のみを処理する
+    const multiNewlineExtension = {
+      name: 'multiNewline',
+      level: 'block',
+      start(src) {
+        // テキストの先頭、または改行直後の位置を探す
+        const match = src.match(/(?:\r\n|\n){3,}/);
+        return match ? match.index : undefined;
+      },
+      tokenizer(src, tokens) {
+        // 1. 解析中の現在位置の先頭が、3連続以上の改行(\r\n または \n)であるか確認
+        // ※コードブロックの解析中は、marked.jsの標準fencesルールが開始の```から終了の```までを
+        //   丸ごと1つのトークンとして切り出すため、このtokenizerにブロック内部が渡されることはない。
+        const rule = /^((?:\r\n|\n){3,})/;
+        const match = rule.exec(src);
+        
+        if (match) {
+          // マッチした文字列から、実際の「改行の回数」を正確にカウントする
+          const newlineCount = (match[1].match(/\r\n|\n/g) || []).length;
+          
+          return {
+            type: 'multiNewline',
+            raw: match[0],
+            brCount: newlineCount - 2
+          };
+        }
+      },
+      renderer(token) {
+        return '<br>'.repeat(token.brCount) + '\n';
+      }
+    };
+
+    marked.use({
+      breaks: true,
+      extensions: [multiNewlineExtension]
+    });
+
+    // テストデータ（コードブロック内の3連続改行と、地の文の3連続改行を混在させる）
+    const sampleMarkdown = `段落１です。
+1回改行（形式段落）。
+
+段落２です。
+
+
+段落３です（上にbrが1つ入り、計2空行分になる）。
+
+\`\`\`javascript
+function test() {
+  // コードブロック内の3連続改行（ここはbrに汚染されない）
+
+
+  console.log("ここはそのまま空行が維持される");
+}
+\`\`\`
+
+
+コードブロックの後の段落４です（上にbrが1つ入る）。`;
+
+    document.getElementById('output').innerHTML = marked.parse(sampleMarkdown);
+  </script>
+</body>
+</html>
+

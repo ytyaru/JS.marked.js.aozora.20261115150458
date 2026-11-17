@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>日本語Markdownパーサ（修正版）</title>
+  <!--<script src="./marked.min.js"></script>-->
+  <script src="./marked.umd.min.js"></script>
+
+  <style>
+    /* ブラウザ標準と同じく上下1emの余白（マージン相殺により段落間は1行分になる） */
+    /*
+    body { font-family: sans-serif; line-height: 1.8; padding: 20px; }
+    p { margin: 1em 0; }
+    */
+
+    p { margin: 0; }
+    p + p { margin-top: 1em; }
+  </style>
+</head>
+<body>
+
+  <div id="output"></div>
+
+  <script>
+  /*
+    // カスタム拡張：地の文（トップレベル）の3連続改行のみを処理する
+    const multiNewlineExtension = {
+      name: 'multiNewline',
+      level: 'block',
+      start(src) {
+        // テキストの先頭、または改行直後の位置を探す
+        const match = src.match(/(?:\r\n|\n){3,}/);
+        return match ? match.index : undefined;
+      },
+      tokenizer(src, tokens) {
+        // 1. 解析中の現在位置の先頭が、3連続以上の改行(\r\n または \n)であるか確認
+        // ※コードブロックの解析中は、marked.jsの標準fencesルールが開始の```から終了の```までを
+        //   丸ごと1つのトークンとして切り出すため、このtokenizerにブロック内部が渡されることはない。
+        const rule = /^((?:\r\n|\n){3,})/;
+        const match = rule.exec(src);
+        
+        if (match) {
+          // マッチした文字列から、実際の「改行の回数」を正確にカウントする
+          const newlineCount = (match[1].match(/\r\n|\n/g) || []).length;
+          
+          return {
+            type: 'multiNewline',
+            raw: match[0],
+            brCount: newlineCount - 2
+          };
+        }
+      },
+      renderer(token) {
+        return '<br>'.repeat(token.brCount) + '\n';
+      }
+    };
+
+    marked.use({
+      breaks: true,
+      extensions: [multiNewlineExtension]
+    });
+    */
+    // テストデータ（コードブロック内の3連続改行と、地の文の3連続改行を混在させる）
+    const sampleMarkdown = `
+# テスト1：基本の改行（地の文）
+ここは1行目。
+1回改行（形式段落：brになるべき）。
+
+ここは2連続改行（意味段落：pが分かれるべき）。
+
+
+ここは3連続改行（段落間改行：pの間にbrが1つ入るべき）。
+
+
+
+ここは4連続改行（段落間改行：pの間にbrが2つ入るべき）。
+
+# テスト2：フェンスコードブロック（汚染されてはいけない）
+\`\`\`javascript
+function test() {
+  // コード内の2連続改行
+
+  // コード内の3連続改行
+
+
+  // コード内の4連続改行
+
+
+
+  return true;
+}
+\`\`\`
+
+# テスト3：引用ブロック（再帰パースによる汚染テスト）
+> 引用の1行目。
+> 引用内の1回改行。
+>
+> 引用内の2連続改行（引用内の段落分け）。
+>
+>
+> 引用内の3連続改行（空行メタ文字が消えてbrに化けるか検証）。
+
+
+# テスト3-1：引用ブロック\`> \`
+
+> 引用の1行目。
+> 引用内の1回改行。
+> 
+> 引用内の2連続改行（引用内の段落分け）。
+> 
+> 
+> 引用内の3連続改行（空行メタ文字が消えてbrに化けるか検証）。
+
+
+
+# テスト4：リスト（箇条書き内の空行テスト）
+* リスト項目1
+  リスト項目1の2行目（1回改行）
+
+* リスト項目2（2連続改行）
+
+
+* リスト項目3（3連続改行：リストが分断されるか、中にbrが入るか検証）
+
+# テスト5：HTMLブロックの直書き（生のHTMLタグ内の改行テスト）
+<div class="custom-box">
+  <p>HTML直書きブロック内のテキスト</p>
+
+
+  <p>3連続改行の後のテキスト（ここにbrが挿入されるとHTML構造が壊れる）</p>
+</div>
+
+# テスト6：見出しや水平線の前後の3連続改行
+段落のテキスト。
+
+
+## 3連続改行の直後の見出し
+
+
+---
+
+
+水平線の前後の3連続改行。
+
+`;
+
+    document.getElementById('output').innerHTML = marked.parse(sampleMarkdown);
+  </script>
+</body>
+</html>
+
